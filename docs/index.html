@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Engineer Portfolio | Search & Discoverability Specialist</title>
+    <style>
+        /* Modern Minimalist CSS Reset & Variable Tokens */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        :root {
+            --bg-color: #0a192f;
+            --bg-light: #112240;
+            --text-main: #ccd6f6;
+            --text-muted: #8892b0;
+            --accent: #64ffda;
+            --accent-tint: rgba(100, 255, 218, 0.1);
+            --border-color: #233554;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            line-height: 1.6;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Fixed Navigation Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(10, 25, 47, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: table;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .logo {
+            display: table-cell;
+            vertical-align: middle;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: table-cell;
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Layout Container Content */
+        main {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 120px 20px 60px 20px;
+        }
+
+        section {
+            padding: 60px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        section:last-of-type {
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        h2 span {
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: normal;
+            margin-right: 8px;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+        }
+
+        /* Hero / Home Section Styling */
+        .hero-tag {
+            color: var(--accent);
+            font-family: monospace;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 25px;
+            color: #e6f1ff;
+        }
+
+        .hero-description {
+            max-width: 650px;
+            font-size: 1.15rem;
+            margin-bottom: 35px;
+        }
+
+        /* Core Global Button Styling */
+        .btn {
+            display: inline-block;
+            background-color: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 14px 24px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.25s ease;
+            font-family: monospace;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-tint);
+            transform: translateY(-2px);
+        }
+
+        /* Case Study Section Styling */
+        .case-study-card {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .case-study-meta {
+            font-family: monospace;
+            color: var(--accent);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .case-study-title {
+            color: #e6f1ff;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .tech-tags {
+            margin: 20px 0 25px 0;
+        }
+
+        .tech-tags span {
+            display: inline-block;
+            background-color: rgba(35, 53, 84, 0.5);
+            color: var(--text-main);
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            border-radius: 4px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(100, 255, 218, 0.15);
+        }
+
+        /* Code Architecture Blocks */
+        pre {
+            background-color: #020c1b;
+            padding: 18px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border-left: 3px solid var(--accent);
+            margin: 20px 0;
+        }
+
+        code {
+            font-family: "SF Mono", "Fira Code", monospace;
+            font-size: 0.88rem;
+            color: #a8b2d1;
+        }
+
+        /* Profile Block Layouts */
+        .profile-container {
+            display: table;
+            width: 100%;
+        }
+
+        .profile-text {
+            display: table-cell;
+            vertical-align: top;
+            padding-right: 20px;
+        }
+
+        .skills-list {
+            margin-top: 20px;
+            display: block;
+        }
+
+        .skills-list div {
+            width: 48%;
+            display: inline-block;
+            color: var(--text-muted);
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .skills-list div::before {
+            content: "▹";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* Footer Alignment */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-family: monospace;
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-color);
+            max-width: 850px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation Grid -->
+    <header>
+        <div class="nav-container">
+            <div class="logo">AM &bull; ML</div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#work">Case Study</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Stream -->
+    <main>
+
+        <!-- Home / Hero Entry Component -->
+        <section id="home">
+            <div class="hero-tag">Hello world, I am</div>
+            <h1 class="hero-title">Abdul Manan.</h1>
+            <p class="hero-description text-main" style="color: #e6f1ff; font-weight: 500; font-size: 1.5rem; line-height: 1.3;">
+                I am a Machine Learning Engineer. I build human-readable models to track and rescue dropping search engagement before traffic crashes.
+            </p>
+            <p class="hero-description">
+                Specializing in search discoverability systems, predictive pipeline development, and transparent evaluation mechanics that help platforms capture risk early.
+            </p>
+            <a href="#work" class="btn">Explore Pipeline Case Study</a>
+        </section>
+
+        <!-- Case Study Technical Blueprint -->
+        <section id="work">
+            <h2><span>01.</span>Featured Core Project</h2>
+            
+            <div class="case-study-card">
+                <div class="case-study-meta">Production Pipeline Build</div>
+                <h3 class="case-study-title">FlyRank Search Trend Discovery & Traffic Rescue Pipeline</h3>
+                <p>
+                    Developed an end-to-end classification pipeline built explicitly to address traffic leakage on dynamic web properties. Rather than relying on untraceable deep ensembles, this system utilizes strict, human-readable structural decision paths to discover early interaction triggers between platform visibility metrics and engagement metrics.
+                </p>
+                <p>
+                    By isolating interactions between historical click-through rates, content freshness indices, and organic positioning intervals, the engine identifies down-trending asset clusters before traffic fallout manifests at the client layer.
+                </p>
+
+                <p style="margin-top: 15px; font-weight: bold; color: var(--text-main);">
+                    Human-Readable Model Core Logic (Depth-2 Structural Printout):
+                </p>
+                <pre><code>|--- impressions_90d <= 5.50
+|   |--- avg_position <= 0.75
+|   |   |--- class: 0 (Stable Structure)
+|   |--- avg_position >  0.75
+|   |   |--- class: 0 (Stable Structure)
+|--- impressions_90d >  5.50
+|   |--- content_age_days <= 312.50
+|   |   |--- class: 1 (Declining / Intervention Needed)
+|   |--- content_age_days >  312.50
+|   |   |--- class: 0 (Stable Structure)</code></pre>
+
+                <div class="tech-tags">
+                    <span>Python</span>
+                    <span>Scikit-Learn</span>
+                    <span>Pandas</span>
+                    <span>Search Console API</span>
+                    <span>Client-Holdout Validation</span>
+                </div>
+                
+                <a href="https://github.com/abdulmanan278/flyrank-ml-internship-starter" target="_blank" class="btn">View Source Code Repository</a>
+            </div>
+        </section>
+
+        <!-- Biography / Technical Foundation Profile -->
+        <section id="about">
+            <h2><span>02.</span>About Profile</h2>
+            <div class="profile-container">
+                <div class="profile-text">
+                    <p>
+                        I am an analytical computer science professional focused on developing verifiable data models, core data structures, and optimized algorithm implementations. My engineering methodology focuses heavily on transparent evaluation strategies and strict isolation of evaluation boundaries to protect code against data leakage.
+                    </p>
+                    <p>
+                        Through structural architecture tracks covering algorithmic complexity, system pipeline testing, and specialized ML classification, I write clean code that explicitly hooks data features to business optimization layers.
+                    </p>
+                    <p>
+                        Core technical foundations and frameworks I operate within include:
+                    </p>
+                    <div class="skills-list">
+                        <div>Python (Scikit-Learn / Pandas)</div>
+                        <div>C++ (OOP / Template Architecture)</div>
+                        <div>Data Infrastructure & SQL</div>
+                        <div>Git Pipeline Versioning</div>
+                        <div>Data Pipeline Integrity Checkups</div>
+                        <div>Analytical Discovery Tracking</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Gateway / Contact Component -->
+        <section id="contact" style="text-align: center; padding: 100px 0;">
+            <div class="hero-tag" style="margin-bottom: 10px;">What is Next?</div>
+            <h2>Get In Touch</h2>
+            <p style="max-width: 500px; margin: 0 auto 40px auto;">
+                I am currently open to analytical engineering roles, machine learning specializations, and data pipeline collaboration environments. Drop an inquiry or explore the direct project repositories.
+            </p>
+            <div style="margin-top: 20px;">
+                <a href="mailto:abdulmanan2728@gmail.com" class="btn" style="margin-right: 15px; margin-bottom: 15px;">Book a Discovery Consultation</a>
+                <a href="https://github.com/abdulmanan278" target="_blank" class="btn">Review Full Code Base</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer System Notice -->
+    <footer>
+        <p>&copy; 2026 Abdul Manan. Optimized for semantic layout integrity.</p>
+    </footer>
+
+</body>
+</html>
