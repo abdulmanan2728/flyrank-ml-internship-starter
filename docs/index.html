@@ -1,384 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ML Engineer Portfolio | Search & Discoverability Specialist</title>
-    <style>
-        /* Modern Minimalist CSS Reset & Variable Tokens */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        :root {
-            --bg-color: #0a192f;
-            --bg-light: #112240;
-            --text-main: #ccd6f6;
-            --text-muted: #8892b0;
-            --accent: #64ffda;
-            --accent-tint: rgba(100, 255, 218, 0.1);
-            --border-color: #233554;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prioritizing the Weekly Refresh Queue: Predicting Content Decline from Search Performance Signals</title>
+<meta name="description" content="A FlyRank ML Internship capstone — Refresh / Content Opportunity Scoring. A client-grouped Random Forest reaches 0.805 precision vs. a 0.524 baseline at flagging declining content.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F5F1;
+    --paper-line:#E4E3DC;
+    --ink:#1E2320;
+    --ink-soft:#4B5049;
+    --teal:#256B5E;
+    --teal-soft:#DCE9E5;
+    --stale:#9A8F7E;
+    --amber:#B4632B;
+    --amber-soft:#F3E4D6;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important; transition:none!important;}
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:18px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--teal);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--teal); outline-offset:3px;}
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: var(--font-family);
-            line-height: 1.6;
-            padding: 0;
-            overflow-x: hidden;
-        }
+  .wrap{max-width:760px; margin:0 auto; padding:0 24px;}
 
-        /* Fixed Navigation Header */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: rgba(10, 25, 47, 0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            z-index: 100;
-        }
+  /* ---------- header / masthead ---------- */
+  header.masthead{
+    border-bottom:1px solid var(--paper-line);
+    padding:64px 0 40px;
+    background:
+      repeating-linear-gradient(90deg, transparent, transparent 39px, var(--paper-line) 39px, var(--paper-line) 40px);
+    background-size: 100% 100%;
+    position:relative;
+  }
+  header.masthead::before{
+    content:"";
+    position:absolute; inset:0;
+    background:var(--paper);
+    opacity:.94;
+  }
+  header.masthead .wrap{position:relative;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 18px;
+  }
+  h1.title{
+    font-size:clamp(28px, 4.4vw, 42px);
+    line-height:1.15;
+    font-weight:600;
+    margin:0 0 20px;
+    letter-spacing:-0.01em;
+  }
+  .dek{
+    font-family:var(--sans);
+    color:var(--ink-soft);
+    font-size:16px;
+    margin:0;
+  }
 
-        .nav-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: table;
-            width: 100%;
-            padding: 20px;
-        }
+  /* freshness gauge — the signature element: a spectrum from stale to fresh,
+     with a marker showing where the baseline and the model land */
+  .gauge{
+    margin-top:36px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--ink-soft);
+  }
+  .gauge-track{
+    position:relative;
+    height:10px;
+    border-radius:6px;
+    background:linear-gradient(90deg, var(--stale), var(--teal-soft) 55%, var(--teal));
+    margin:10px 0 8px;
+  }
+  .gauge-mark{
+    position:absolute; top:-6px;
+    width:2px; height:22px;
+    background:var(--ink);
+  }
+  .gauge-mark .lbl{
+    position:absolute; top:-20px; left:50%; transform:translateX(-50%);
+    white-space:nowrap; font-size:11px;
+  }
+  .gauge-mark .val{
+    position:absolute; top:24px; left:50%; transform:translateX(-50%);
+    white-space:nowrap; font-weight:600; color:var(--ink);
+  }
 
-        .logo {
-            display: table-cell;
-            vertical-align: middle;
-            font-weight: 700;
-            color: var(--accent);
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-        }
+  /* ---------- nav ---------- */
+  nav.toc{
+    border-bottom:1px solid var(--paper-line);
+    padding:14px 0;
+    font-family:var(--mono);
+    font-size:12px;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+  nav.toc a{
+    color:var(--ink-soft);
+    text-decoration:none;
+    margin-right:22px;
+    letter-spacing:.02em;
+  }
+  nav.toc a:hover{color:var(--teal);}
 
-        .nav-links {
-            display: table-cell;
-            text-align: right;
-            vertical-align: middle;
-        }
+  /* ---------- sections ---------- */
+  main{padding:8px 0 40px;}
+  section{padding:52px 0; border-bottom:1px solid var(--paper-line);}
+  section:last-of-type{border-bottom:none;}
+  .section-label{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 14px;
+  }
+  h2{
+    font-size:26px;
+    font-weight:600;
+    margin:0 0 18px;
+    letter-spacing:-0.005em;
+  }
+  h3{
+    font-size:19px;
+    font-weight:600;
+    margin:28px 0 10px;
+  }
+  p{margin:0 0 16px;}
+  ul, ol{margin:0 0 16px; padding-left:22px;}
+  li{margin-bottom:8px;}
+  strong{font-weight:600;}
+  .lede{
+    font-size:20px;
+    color:var(--ink-soft);
+    font-family:var(--sans);
+    font-weight:400;
+  }
 
-        .nav-links a {
-            color: var(--text-main);
-            text-decoration: none;
-            margin-left: 25px;
-            font-size: 0.9rem;
-            transition: color 0.2s ease;
-        }
+  /* callouts */
+  .callout{
+    background:var(--teal-soft);
+    border-left:3px solid var(--teal);
+    padding:16px 20px;
+    border-radius:2px;
+    font-family:var(--sans);
+    font-size:15px;
+    color:var(--ink);
+    margin:20px 0;
+  }
+  .callout.warn{
+    background:var(--amber-soft);
+    border-left-color:var(--amber);
+  }
 
-        .nav-links a:hover {
-            color: var(--accent);
-        }
+  /* tables */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:var(--mono);
+    font-size:14px;
+    margin:20px 0;
+  }
+  caption{
+    text-align:left;
+    font-family:var(--sans);
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+    caption-side:top;
+  }
+  th, td{
+    text-align:left;
+    padding:10px 12px;
+    border-bottom:1px solid var(--paper-line);
+  }
+  th{
+    font-weight:600;
+    color:var(--ink-soft);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+  tr.hero td{font-weight:600; color:var(--teal);}
+  .chart-note{
+    font-family:var(--sans);
+    font-size:14px;
+    color:var(--ink-soft);
+    margin-top:-6px;
+  }
 
-        /* Layout Container Content */
-        main {
-            max-width: 850px;
-            margin: 0 auto;
-            padding: 120px 20px 60px 20px;
-        }
+  /* bar chart (pure CSS, real numbers) */
+  .barchart{margin:24px 0;}
+  .bar-row{display:flex; align-items:center; gap:14px; margin-bottom:12px; font-family:var(--mono); font-size:13px;}
+  .bar-label{width:170px; flex-shrink:0; color:var(--ink-soft);}
+  .bar-track{flex:1; background:var(--paper-line); border-radius:3px; height:20px; position:relative; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:3px;}
+  .bar-fill.baseline{background:var(--stale);}
+  .bar-fill.model{background:var(--teal);}
+  .bar-value{width:56px; text-align:right; flex-shrink:0; font-weight:600;}
 
-        section {
-            padding: 60px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        section:last-of-type {
-            border-bottom: none;
-        }
+  /* action tier chips */
+  .tiers{display:flex; flex-wrap:wrap; gap:10px; margin:18px 0;}
+  .tier{
+    font-family:var(--mono); font-size:12.5px;
+    padding:6px 12px; border-radius:14px;
+    border:1px solid var(--paper-line);
+  }
+  .tier.urgent{background:var(--amber-soft); border-color:var(--amber); color:#7A3F17;}
+  .tier.review{background:var(--teal-soft); border-color:var(--teal); color:var(--teal);}
+  .tier.monitor{background:transparent; color:var(--ink-soft);}
+  .tier.healthy{background:transparent; color:var(--stale);}
 
-        h2 {
-            font-size: 1.8rem;
-            color: var(--text-main);
-            margin-bottom: 30px;
-            font-weight: 600;
-        }
+  ol.recs li{margin-bottom:18px;}
+  ol.recs .why{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); margin-top:4px;}
 
-        h2 span {
-            color: var(--accent);
-            font-family: monospace;
-            font-size: 1.2rem;
-            font-weight: normal;
-            margin-right: 8px;
-        }
+  footer{
+    padding:40px 0 80px;
+    font-family:var(--sans);
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  footer a{color:var(--teal);}
 
-        p {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            margin-bottom: 20px;
-        }
+  code{
+    font-family:var(--mono);
+    background:var(--teal-soft);
+    padding:1px 6px;
+    border-radius:3px;
+    font-size:.9em;
+  }
 
-        /* Hero / Home Section Styling */
-        .hero-tag {
-            color: var(--accent);
-            font-family: monospace;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .hero-title {
-            font-size: 2.8rem;
-            font-weight: 700;
-            line-height: 1.15;
-            margin-bottom: 25px;
-            color: #e6f1ff;
-        }
-
-        .hero-description {
-            max-width: 650px;
-            font-size: 1.15rem;
-            margin-bottom: 35px;
-        }
-
-        /* Core Global Button Styling */
-        .btn {
-            display: inline-block;
-            background-color: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 14px 24px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: all 0.25s ease;
-            font-family: monospace;
-        }
-
-        .btn:hover {
-            background-color: var(--accent-tint);
-            transform: translateY(-2px);
-        }
-
-        /* Case Study Section Styling */
-        .case-study-card {
-            background-color: var(--bg-light);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 30px;
-            margin-top: 20px;
-        }
-
-        .case-study-meta {
-            font-family: monospace;
-            color: var(--accent);
-            font-size: 0.85rem;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .case-study-title {
-            color: #e6f1ff;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-
-        .tech-tags {
-            margin: 20px 0 25px 0;
-        }
-
-        .tech-tags span {
-            display: inline-block;
-            background-color: rgba(35, 53, 84, 0.5);
-            color: var(--text-main);
-            padding: 4px 10px;
-            font-size: 0.8rem;
-            font-family: monospace;
-            border-radius: 4px;
-            margin-right: 8px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(100, 255, 218, 0.15);
-        }
-
-        /* Code Architecture Blocks */
-        pre {
-            background-color: #020c1b;
-            padding: 18px;
-            border-radius: 4px;
-            overflow-x: auto;
-            border-left: 3px solid var(--accent);
-            margin: 20px 0;
-        }
-
-        code {
-            font-family: "SF Mono", "Fira Code", monospace;
-            font-size: 0.88rem;
-            color: #a8b2d1;
-        }
-
-        /* Profile Block Layouts */
-        .profile-container {
-            display: table;
-            width: 100%;
-        }
-
-        .profile-text {
-            display: table-cell;
-            vertical-align: top;
-            padding-right: 20px;
-        }
-
-        .skills-list {
-            margin-top: 20px;
-            display: block;
-        }
-
-        .skills-list div {
-            width: 48%;
-            display: inline-block;
-            color: var(--text-muted);
-            font-family: monospace;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            padding-left: 15px;
-            position: relative;
-        }
-
-        .skills-list div::before {
-            content: "▹";
-            position: absolute;
-            left: 0;
-            color: var(--accent);
-        }
-
-        /* Footer Alignment */
-        footer {
-            text-align: center;
-            padding: 40px 0;
-            color: var(--text-muted);
-            font-family: monospace;
-            font-size: 0.8rem;
-            border-top: 1px solid var(--border-color);
-            max-width: 850px;
-            margin: 0 auto;
-        }
-    </style>
+  @media (max-width:600px){
+    body{font-size:16.5px;}
+    .bar-label{width:120px; font-size:11.5px;}
+    header.masthead{padding:44px 0 28px;}
+  }
+</style>
 </head>
 <body>
 
-    <!-- Header Navigation Grid -->
-    <header>
-        <div class="nav-container">
-            <div class="logo">AM &bull; ML</div>
-            <div class="nav-links">
-                <a href="#home">Home</a>
-                <a href="#work">Case Study</a>
-                <a href="#about">About</a>
-                <a href="#contact">Contact</a>
-            </div>
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">FlyRank ML Internship &middot; Capstone &middot; Refresh / Content Opportunity Scoring</p>
+    <h1 class="title">Prioritizing the Weekly Refresh Queue: Predicting Content Decline from Search Performance Signals</h1>
+    <p class="dek">A client-grouped Random Forest scores which pages are worth an SEO analyst's attention this week — validated honestly against a hand-written baseline, on real FlyRank search performance data.</p>
+
+    <div class="gauge" aria-hidden="true">
+      <div class="gauge-track">
+        <div class="gauge-mark" style="left:8%;">
+          <span class="lbl">baseline</span>
+          <span class="val">0.524</span>
         </div>
-    </header>
+        <div class="gauge-mark" style="left:74%;">
+          <span class="lbl">model</span>
+          <span class="val">0.805</span>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between;"><span>stale rule</span><span>validated model</span></div>
+    </div>
+  </div>
+</header>
 
-    <!-- Main Content Stream -->
-    <main>
+<nav class="toc" aria-label="Table of contents">
+  <div class="wrap">
+    <a href="#abstract">Abstract</a>
+    <a href="#intro">Introduction</a>
+    <a href="#data">Data</a>
+    <a href="#methodology">Methodology</a>
+    <a href="#results">Results</a>
+    <a href="#limitations">Limitations</a>
+    <a href="#recommendations">Recommendations</a>
+    <a href="#reproducibility">Reproducibility</a>
+    <a href="#acknowledgments">Acknowledgments</a>
+  </div>
+</nav>
 
-        <!-- Home / Hero Entry Component -->
-        <section id="home">
-            <div class="hero-tag">Hello world, I am</div>
-            <h1 class="hero-title">Abdul Manan.</h1>
-            <p class="hero-description text-main" style="color: #e6f1ff; font-weight: 500; font-size: 1.5rem; line-height: 1.3;">
-                I am a Machine Learning Engineer. I build human-readable models to track and rescue dropping search engagement before traffic crashes.
-            </p>
-            <p class="hero-description">
-                Specializing in search discoverability systems, predictive pipeline development, and transparent evaluation mechanics that help platforms capture risk early.
-            </p>
-            <a href="#work" class="btn">Explore Pipeline Case Study</a>
-        </section>
+<main class="wrap">
 
-        <!-- Case Study Technical Blueprint -->
-        <section id="work">
-            <h2><span>01.</span>Featured Core Project</h2>
-            
-            <div class="case-study-card">
-                <div class="case-study-meta">Production Pipeline Build</div>
-                <h3 class="case-study-title">FlyRank Search Trend Discovery & Traffic Rescue Pipeline</h3>
-                <p>
-                    Developed an end-to-end classification pipeline built explicitly to address traffic leakage on dynamic web properties. Rather than relying on untraceable deep ensembles, this system utilizes strict, human-readable structural decision paths to discover early interaction triggers between platform visibility metrics and engagement metrics.
-                </p>
-                <p>
-                    By isolating interactions between historical click-through rates, content freshness indices, and organic positioning intervals, the engine identifies down-trending asset clusters before traffic fallout manifests at the client layer.
-                </p>
+  <section id="abstract">
+    <p class="section-label">Abstract</p>
+    <p class="lede">Content teams can't manually review every page for decline every week — so which pages should an analyst check first? This work builds a scoring model on FlyRank's pseudonymized content-performance dataset (30,000 pages, 32 clients, trailing-90-day search metrics) to flag pages showing a downward 30-day impression trend. A Random Forest trained on 28 engagement and freshness features is validated against a client-grouped holdout — never a naive random split, which this paper shows inflates results by roughly 10 points of precision. Under the honest split, the model reaches 0.805 precision and 0.900 recall, against a hand-written baseline rule's 0.524 precision and 0.100 recall on the same test rows. The result is packaged as a ranked, reason-coded weekly review queue — a decision-support tool for prioritizing human attention, not a claim about causation or about Google's ranking algorithm.</p>
+  </section>
 
-                <p style="margin-top: 15px; font-weight: bold; color: var(--text-main);">
-                    Human-Readable Model Core Logic (Depth-2 Structural Printout):
-                </p>
-                <pre><code>|--- impressions_90d <= 5.50
-|   |--- avg_position <= 0.75
-|   |   |--- class: 0 (Stable Structure)
-|   |--- avg_position >  0.75
-|   |   |--- class: 0 (Stable Structure)
-|--- impressions_90d >  5.50
-|   |--- content_age_days <= 312.50
-|   |   |--- class: 1 (Declining / Intervention Needed)
-|   |--- content_age_days >  312.50
-|   |   |--- class: 0 (Stable Structure)</code></pre>
+  <section id="intro">
+    <p class="section-label">1&nbsp;&middot;&nbsp;Introduction</p>
+    <h2>The problem isn't finding declining pages. It's finding them in time.</h2>
+    <p>Search-visible content decays unevenly across a client's page set, and manually checking every page for decline doesn't scale once a portfolio reaches thousands of pages. This work supports a simple, recurring decision: <strong>which pages should an SEO analyst review this week, and why?</strong></p>
+    <p>The output isn't a verdict — it's a ranked, reason-coded queue that an analyst works through, top-down, until their review capacity for the week runs out. A false positive here costs a few wasted minutes reviewing a page that turned out fine. A false negative costs a real page another week of unnoticed decline. Neither failure is catastrophic, which is exactly why this is framed as decision-support, not an automated action.</p>
+    <p>A single hand-written rule — "flag any page with below-median CTR," say — turns out to be far too blunt for this. Decline is driven by a tangled combination of momentum, click behavior, and freshness that shifts across content types and clients; the sections below show, with real numbers, exactly how much a learned model captures that a fixed rule misses.</p>
+  </section>
 
-                <div class="tech-tags">
-                    <span>Python</span>
-                    <span>Scikit-Learn</span>
-                    <span>Pandas</span>
-                    <span>Search Console API</span>
-                    <span>Client-Holdout Validation</span>
-                </div>
-                
-                <a href="https://github.com/abdulmanan278/flyrank-ml-internship-starter" target="_blank" class="btn">View Source Code Repository</a>
-            </div>
-        </section>
+  <section id="data">
+    <p class="section-label">2&nbsp;&middot;&nbsp;Data</p>
+    <h2>Data</h2>
+    <p><strong>Release:</strong> FlyRank's pseudonymized starter dataset — <code>content_refresh_anonymized.csv</code> — 30,000 content items across 32 clients, each row a trailing-90-day performance snapshot.</p>
+    <p><strong>Unit of analysis:</strong> one row = one pseudonymized content item. Grain was verified directly — zero duplicate <code>content_id</code> values across all 30,000 rows.</p>
+    <p><strong>Label:</strong> <code>is_declining</code>, built from the dataset's own <code>trend_direction</code> field (<code>trend_direction == 'down'</code>) — an observed 30-day-vs-prior-30-day impression comparison, not a hand-labeled judgment. Base rate: 0.542 (54% of pages trending down), close to balanced.</p>
+    <p><strong>Deliberately excluded as features:</strong> <code>trend_pct</code> and <code>trend_direction</code> themselves are the source of the label — using either as a model input would let the model learn the label's own definition rather than a genuine predictive pattern. Every candidate feature was checked against <code>trend_pct</code> for correlation before inclusion; the strongest correlation found was 0.097, well below any concerning threshold.</p>
+    <p><strong>Public-safety:</strong> no client names, domains, URLs, or raw queries appear anywhere in this paper or the underlying notebooks — all identifiers are FlyRank's pseudonymized hash keys.</p>
+  </section>
 
-        <!-- Biography / Technical Foundation Profile -->
-        <section id="about">
-            <h2><span>02.</span>About Profile</h2>
-            <div class="profile-container">
-                <div class="profile-text">
-                    <p>
-                        I am an analytical computer science professional focused on developing verifiable data models, core data structures, and optimized algorithm implementations. My engineering methodology focuses heavily on transparent evaluation strategies and strict isolation of evaluation boundaries to protect code against data leakage.
-                    </p>
-                    <p>
-                        Through structural architecture tracks covering algorithmic complexity, system pipeline testing, and specialized ML classification, I write clean code that explicitly hooks data features to business optimization layers.
-                    </p>
-                    <p>
-                        Core technical foundations and frameworks I operate within include:
-                    </p>
-                    <div class="skills-list">
-                        <div>Python (Scikit-Learn / Pandas)</div>
-                        <div>C++ (OOP / Template Architecture)</div>
-                        <div>Data Infrastructure & SQL</div>
-                        <div>Git Pipeline Versioning</div>
-                        <div>Data Pipeline Integrity Checkups</div>
-                        <div>Analytical Discovery Tracking</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+  <section id="methodology">
+    <p class="section-label">3&nbsp;&middot;&nbsp;Methodology</p>
+    <h2>Methodology</h2>
 
-        <!-- Action Gateway / Contact Component -->
-        <section id="contact" style="text-align: center; padding: 100px 0;">
-            <div class="hero-tag" style="margin-bottom: 10px;">What is Next?</div>
-            <h2>Get In Touch</h2>
-            <p style="max-width: 500px; margin: 0 auto 40px auto;">
-                I am currently open to analytical engineering roles, machine learning specializations, and data pipeline collaboration environments. Drop an inquiry or explore the direct project repositories.
-            </p>
-            <div style="margin-top: 20px;">
-                <a href="mailto:abdulmanan2728@gmail.com" class="btn" style="margin-right: 15px; margin-bottom: 15px;">Book a Discovery Consultation</a>
-                <a href="https://github.com/abdulmanan278" target="_blank" class="btn">Review Full Code Base</a>
-            </div>
-        </section>
+    <h3>Features</h3>
+    <p>28 features spanning traffic volume (<code>impressions_90d</code>, <code>clicks_90d</code>, 30-day windows), engagement (<code>scroll_rate</code>, <code>engagement_rate</code>), freshness (<code>days_since_last_update</code>, <code>content_age_days</code>), and ranking position (<code>avg_position</code>, <code>ctr</code>) — every one available at decision time, none derived from the label.</p>
 
-    </main>
+    <h3>Baseline</h3>
+    <p>A transparent, hand-written rule, built the same way FlyRank's own internal flags are built: flag a page if it's both <strong>stale</strong> (31&ndash;180 days since last update — the 181+ tier was excluded after a signal check showed decline rate actually reverses downward past 180 days) and has <strong>below-median click-through rate relative to its position-tier peers</strong>. Both signals were verified independently before use — staleness gave a <em>mixed</em> verdict (decline rate rises through 91&ndash;180 days, then reverses for 181+), while the CTR-vs-position gap gave a clean <em>confirmed</em> verdict (0.593 vs. 0.503 decline rate across large samples).</p>
 
-    <!-- Footer System Notice -->
-    <footer>
-        <p>&copy; 2026 Abdul Manan. Optimized for semantic layout integrity.</p>
-    </footer>
+    <h3>Model</h3>
+    <p>Random Forest — chosen because decline isn't driven by one clean signal but by tangled, nonlinear interactions between the features above, which tree ensembles capture without hand-specifying interactions, while still producing interpretable feature importances.</p>
+
+    <h3>Validation design</h3>
+    <p>Split <strong>grouped by <code>client_id</code></strong>, not random — no client's pages appear in both train and test. This matters concretely: a naive random split on this exact model produced 0.901 precision, a number inflated by the model partly memorizing client-specific patterns. The grouped split gives the honest number: <strong>0.805 precision</strong>. That ~10-point gap is reported here directly rather than the flattering number alone.</p>
+
+    <h3>Leakage audit</h3>
+    <p>Every feature's correlation with the label's source column (<code>trend_pct</code>) was checked twice, independently, across two separate audits. Maximum correlation found: 0.097. No label-derived column appears in the feature set at any point.</p>
+  </section>
+
+  <section id="results">
+    <p class="section-label">4&nbsp;&middot;&nbsp;Results</p>
+    <h2>Model vs. baseline, same split, same metric</h2>
+
+    <table>
+      <caption>Precision / recall / F1 on the client-grouped test set (base rate: 0.517)</caption>
+      <thead><tr><th>Method</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+      <tbody>
+        <tr><td>Baseline rule</td><td>0.524</td><td>0.100</td><td>0.168</td></tr>
+        <tr class="hero"><td>Random Forest</td><td>0.805</td><td>0.900</td><td>0.850</td></tr>
+      </tbody>
+    </table>
+
+    <div class="barchart" role="img" aria-label="Bar chart comparing baseline and model precision: baseline 0.524, model 0.805">
+      <div class="bar-row">
+        <span class="bar-label">baseline &middot; precision</span>
+        <span class="bar-track"><span class="bar-fill baseline" style="width:52.4%;"></span></span>
+        <span class="bar-value">0.524</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">model &middot; precision</span>
+        <span class="bar-track"><span class="bar-fill model" style="width:80.5%;"></span></span>
+        <span class="bar-value">0.805</span>
+      </div>
+    </div>
+    <p class="chart-note">The model beats the baseline by 28 points of precision and roughly 9&times; the recall, on identical test rows.</p>
+
+    <h3>Why the naive split matters</h3>
+    <table>
+      <caption>Same model, two split designs</caption>
+      <thead><tr><th>Split</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+      <tbody>
+        <tr><td>Naive random split</td><td>0.901</td><td>0.931</td><td>0.916</td></tr>
+        <tr class="hero"><td>Client-grouped split (reported)</td><td>0.805</td><td>0.900</td><td>0.850</td></tr>
+      </tbody>
+    </table>
+    <p>0.901 is the number a careless evaluation would report. 0.805 is the number that actually reflects performance on a client the model hasn't seen before — the number this paper stands behind.</p>
+
+    <h3>What the model leans on</h3>
+    <ul>
+      <li><code>impressions_prev_30d</code> — 0.211 importance</li>
+      <li><code>impressions_last_30d</code> — 0.158</li>
+      <li><code>impressions_90d</code> — 0.080</li>
+      <li><code>avg_position</code> — 0.062</li>
+      <li><code>days_with_impressions</code> — 0.046</li>
+    </ul>
+    <p>Recent impression momentum dominates — sensible, since the label itself is fundamentally about impressions changing.</p>
+
+    <h3>Where it's wrong</h3>
+    <p>False positives (800 rows, 11.2% of test set) outnumber false negatives (365 rows, 5.1%) more than 2-to-1 — the model errs toward flagging borderline cases, consistent with a deliberate precision-over-recall design choice. False positives skew toward lower-traffic pages (avg. 2,160 impressions vs. 3,728 overall) — a page with few impressions produces noisier percentage swings that are easier to misread as decline.</p>
+  </section>
+
+  <section id="limitations">
+    <p class="section-label">5&nbsp;&middot;&nbsp;Limitations &amp; honest framing</p>
+    <h2>What this can and cannot claim</h2>
+    <div class="callout warn">
+      <strong>Can claim:</strong> under a client-grouped holdout, the model achieves 0.805 precision and 0.900 recall at flagging pages with a downward 30-day-vs-prior-30-day impression trend — a directional, decision-support signal for prioritizing manual review.
+    </div>
+    <div class="callout warn">
+      <strong>Cannot claim:</strong> that this predicts future outcomes with certainty, that any one feature causally drives decline, or anything about Google's ranking algorithm. High feature importance describes what the model leans on — it is not evidence of an external cause.
+    </div>
+    <ul>
+      <li>Trained on a single historical snapshot — doesn't account for seasonality or algorithm changes since the data was captured.</li>
+      <li><code>review</code> + <code>review_urgent</code> flags cover 50.5% of the full inventory — far more than any team can review weekly. <code>risk_score</code> is a ranking signal to sort within capacity, not a fixed workload.</li>
+      <li>Validated on held-out clients from the same snapshot, not on genuinely new data collected after training — real-world drift is untested.</li>
+      <li>The starter dataset (30K rows) is a slice of FlyRank's much larger warehouse (~79M rows); results here should be read as a validated prototype, not a claim about the full population.</li>
+    </ul>
+  </section>
+
+  <section id="recommendations">
+    <p class="section-label">6&nbsp;&middot;&nbsp;Ranked recommendations</p>
+    <h2>The action playbook</h2>
+    <div class="tiers" aria-hidden="true">
+      <span class="tier urgent">review_urgent &middot; 5,525 pages</span>
+      <span class="tier review">review &middot; 9,627 pages</span>
+      <span class="tier monitor">monitor &middot; 2,442 pages</span>
+      <span class="tier healthy">healthy &middot; 12,406 pages</span>
+    </div>
+    <ol class="recs">
+      <li><strong>Start with <code>review_urgent</code>: high risk score AND stale (&gt;90 days since update).</strong>
+        <div class="why">Pairs the model's strongest signal with the freshness pattern that FlyRank's own research has independently confirmed — decline accelerates sharply once content passes roughly nine months untouched.</div>
+      </li>
+      <li><strong>Rank <code>review</code> by <code>risk_score</code> and take only the top slice your team has capacity for.</strong>
+        <div class="why">50.5% of inventory is flagged in total — far more than a weekly workload. Treat the score as a sort order, not a checklist to clear in full.</div>
+      </li>
+      <li><strong>Before acting on any flag, check impression volume.</strong>
+        <div class="why">False positives skew toward low-traffic pages — a flag on a page with under ~20 impressions deserves a sanity check before spending real effort.</div>
+      </li>
+      <li><strong>Never auto-publish, auto-unpublish, or auto-deindex based on the score alone.</strong>
+        <div class="why">The score is a review prompt built from proxy features, not a validated quality verdict — every action needs a human read on the actual page.</div>
+      </li>
+      <li><strong>Re-validate quarterly, or sooner if the flagged share drifts sharply from 50.5%.</strong>
+        <div class="why">The model was trained on one historical snapshot; portfolio composition and search behavior both shift over time.</div>
+      </li>
+    </ol>
+  </section>
+
+  <section id="reproducibility">
+    <p class="section-label">7&nbsp;&middot;&nbsp;Reproducibility</p>
+    <h2>Rerun this yourself</h2>
+    <p>Every step above traces back to a specific, executed notebook in the project repository:</p>
+    <ul>
+      <li><code>work/notebooks/w01_research_question.ipynb</code> — lane and framing</li>
+      <li><code>work/notebooks/w02_ml_task_framing.ipynb</code> — task type, target, metric</li>
+      <li><code>work/notebooks/w03_data_contract.ipynb</code> — data contract and verification queries</li>
+      <li><code>work/notebooks/w04_baseline_score.ipynb</code> — baseline rule and signal checks</li>
+      <li><code>work/notebooks/w05_model.ipynb</code> — model training and baseline comparison</li>
+      <li><code>work/notebooks/w06_validation_audit.ipynb</code> — grouped-split audit and leakage hunt</li>
+      <li><code>work/notebooks/w07_action_playbook.ipynb</code> — ranked queue and exports</li>
+    </ul>
+    <p>Repo: <a href="https://github.com/abdulmanan2728/flyrank-ml-internship-starter">github.com/abdulmanan2728/flyrank-ml-internship-starter</a> &middot; random seed <code>42</code> used throughout for reproducibility.</p>
+  </section>
+
+  <section id="acknowledgments">
+    <p class="section-label">8&nbsp;&middot;&nbsp;Acknowledgments</p>
+    <h2>Data credit</h2>
+    <p>Built on the FlyRank ML Internship dataset — <a href="https://flyrank.ai">flyrank.ai</a>.</p>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>A FlyRank ML Internship capstone. All results are observed, directional, and intended for decision-support — not causal claims or predictions about Google's ranking systems.</p>
+  </div>
+</footer>
 
 </body>
 </html>
