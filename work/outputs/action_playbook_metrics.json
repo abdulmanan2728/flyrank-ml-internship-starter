@@ -1,0 +1,17 @@
+{
+  "model": "RandomForestClassifier",
+  "validation_split": "GroupShuffleSplit by client_id",
+  "precision": 0.805,
+  "recall": 0.9,
+  "f1": 0.85,
+  "baseline_precision": 0.524,
+  "baseline_recall": 0.1,
+  "total_inventory": 30000,
+  "flagged_share": 0.5050666666666667,
+  "action_counts": {
+    "healthy": 12406,
+    "review": 9627,
+    "review_urgent": 5525,
+    "monitor": 2442
+  }
+}
